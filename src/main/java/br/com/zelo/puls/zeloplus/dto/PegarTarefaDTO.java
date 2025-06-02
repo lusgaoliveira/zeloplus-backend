@@ -12,7 +12,6 @@ public record PegarTarefaDTO(
         LocalDateTime dataCriacao,
         LocalDateTime dataAgendamento,
         TipoTarefa tipoTarefa,
-        Integer idIdoso,
         int nivel,
         StatusTarefa statusTarefa
 

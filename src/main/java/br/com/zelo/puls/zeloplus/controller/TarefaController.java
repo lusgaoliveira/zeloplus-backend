@@ -2,6 +2,7 @@ package br.com.zelo.puls.zeloplus.controller;
 
 import br.com.zelo.puls.zeloplus.dto.CriarTarefaDTO;
 import br.com.zelo.puls.zeloplus.dto.PegarListaTarefaDTO;
+import br.com.zelo.puls.zeloplus.dto.PegarTarefaDTO;
 import br.com.zelo.puls.zeloplus.model.Tarefa;
 import br.com.zelo.puls.zeloplus.service.TarefaService;
 import org.springframework.data.domain.Page;
@@ -28,7 +29,7 @@ public class TarefaController {
     }
 
     @GetMapping("/buscar/{id}")
-    public Tarefa buscarTarefa(@PathVariable Integer id) {
+    public PegarTarefaDTO buscarTarefa(@PathVariable Integer id) {
         return tarefaService.buscarPorId(id);
     }
 

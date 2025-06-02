@@ -2,6 +2,7 @@ package br.com.zelo.puls.zeloplus.service;
 
 import br.com.zelo.puls.zeloplus.dto.CriarTarefaDTO;
 import br.com.zelo.puls.zeloplus.dto.PegarListaTarefaDTO;
+import br.com.zelo.puls.zeloplus.dto.PegarTarefaDTO;
 import br.com.zelo.puls.zeloplus.mapper.TarefaMapper;
 import br.com.zelo.puls.zeloplus.model.Idoso;
 import br.com.zelo.puls.zeloplus.model.StatusTarefa;
@@ -50,7 +51,8 @@ public class TarefaService {
                 .map(TarefaMapper::toDTO);
     }
 
-    public Tarefa buscarPorId(Integer idTarefa) {
-        return tarefaRepository.findById(idTarefa).orElseThrow(() -> new IllegalArgumentException("Tarafa não encontrada"));
+    public PegarTarefaDTO buscarPorId(Integer idTarefa) {
+        return TarefaMapper.toReturnDTO(
+                tarefaRepository.findById(idTarefa).orElseThrow(() -> new IllegalArgumentException("Tarafa não encontrada")));
     }
 }
