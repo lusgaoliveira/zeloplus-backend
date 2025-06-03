@@ -55,4 +55,6 @@ public class TarefaService {
         return TarefaMapper.toReturnDTO(
                 tarefaRepository.findById(idTarefa).orElseThrow(() -> new IllegalArgumentException("Tarafa não encontrada")));
     }
+
+
 }

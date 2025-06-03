@@ -33,7 +33,7 @@ public class Usuario {
     @Column(unique = true, nullable = false)
     private String email;
 
-    @Column(name = "foto_perfil_url")
-    private String fotoPerfilUrl;
+    @Column(name = "foto_perfil")
+    private byte[] fotoPerfil;;
 
 }

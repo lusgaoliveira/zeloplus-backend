@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
+import java.util.Base64;
 
 @Service
 public class UsuarioService {
@@ -36,6 +37,7 @@ public class UsuarioService {
         this.cuidadorRepository = cuidadorRepository;
         this.idosoRepository = idosoRepository;
     }
+
 
     public LoginRespostaDTO login(LoginDTO dto) {
         Usuario usuario = usuarioRepository.findByNomeUsuario(dto.nomeUsuario());
@@ -66,32 +68,49 @@ public class UsuarioService {
             throw new RuntimeException("Tipo de usuário desconhecido");
         }
 
+        // Converte o byte[] da imagem para Base64 (caso tenha imagem)
+        String fotoPerfilBase64 = null;
+        if (usuario.getFotoPerfil() != null) {
+            fotoPerfilBase64 = Base64.getEncoder().encodeToString(usuario.getFotoPerfil());
+        }
+
         return new LoginRespostaDTO(
                 usuario.getId(),
                 usuario.getNomeUsuario(),
-                usuario.getFotoPerfilUrl(),
+                fotoPerfilBase64,
                 nome,
                 tipoUsuario,
                 codigo
         );
     }
 
-
-
-
     public Usuario salvar(CriarUsuarioDTO dto) {
-        var usuario = new Usuario();
-        if (dto.codigoVinculo().isEmpty()) {
-            usuario = new Usuario(null, dto.nomeUsuario(), dto.senha(), TipoUsuario.valueOf(dto.tipoUsuario()), dto.email(), dto.fotoPerfilUrl());
-            repository.save(usuario);
+        byte[] fotoPerfilBytes = null;
+
+        if (dto.fotoPerfil() != null && !dto.fotoPerfil().isEmpty()) {
+            fotoPerfilBytes = Base64.getDecoder().decode(dto.fotoPerfil());
+        }
+
+        var usuario = new Usuario(
+                null,
+                dto.nomeUsuario(),
+                dto.senha(),
+                TipoUsuario.valueOf(dto.tipoUsuario()),
+                dto.email(),
+                fotoPerfilBytes
+        );
+
+        repository.save(usuario);
+
+        if (dto.codigoVinculo() == null || dto.codigoVinculo().isEmpty()) {
             idosoService.salvar(new CriarIdosoDTO(dto.nome(), dto.dataNascimento()), usuario);
         } else {
-            Idoso idosoVinculado = idosoService.buscarPorCodigo(dto.codigoVinculo()).orElseThrow(() -> new IllegalArgumentException("Código para vínculo não encontraod"));
-            usuario = new Usuario(null, dto.nomeUsuario(), dto.senha(), TipoUsuario.valueOf(dto.tipoUsuario()), dto.email(), dto.fotoPerfilUrl());
+            Idoso idosoVinculado = idosoService.buscarPorCodigo(dto.codigoVinculo())
+                    .orElseThrow(() -> new IllegalArgumentException("Código para vínculo não encontrado"));
 
-            repository.save(usuario);
             cuidadorService.salvar(new CriarCuidadorDTO(dto.nome(), dto.dataNascimento(), dto.codigoVinculo()), idosoVinculado, usuario);
         }
+
         return usuario;
     }
 
@@ -115,23 +134,14 @@ public class UsuarioService {
             throw new IllegalArgumentException("Arquivo inválido");
         }
 
-        String nomeArquivo = UUID.randomUUID() + "-" + foto.getOriginalFilename();
-        String caminhoCompleto = diretorioFotos + File.separator + nomeArquivo;
-
-        File pasta = new File(diretorioFotos);
-        if (!pasta.exists()) {
-            pasta.mkdirs();
-        }
-
         try {
-            foto.transferTo(new File(caminhoCompleto));
+            byte[] imagemBytes = foto.getBytes();
+            usuario.setFotoPerfil(imagemBytes);
+            usuarioRepository.save(usuario);
         } catch (IOException e) {
-            throw new RuntimeException("Erro ao salvar imagem", e);
+            throw new RuntimeException("Erro ao processar imagem", e);
         }
 
-        usuario.setFotoPerfilUrl("/uploads/fotos/" + nomeArquivo);
-        usuarioRepository.save(usuario);
-
-        return usuario.getFotoPerfilUrl();
+        return "Foto de perfil salva com sucesso.";
     }
 }

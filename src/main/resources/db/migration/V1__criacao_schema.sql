@@ -3,7 +3,8 @@ CREATE TABLE usuarios (
     nome_usuario VARCHAR(255) UNIQUE NOT NULL,
     senha VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
-    tipo_usuario VARCHAR(255) NOT NULL
+    tipo_usuario VARCHAR(255) NOT NULL,
+    foto_perfil BYTEA
 );
 
 CREATE TABLE idosos (
