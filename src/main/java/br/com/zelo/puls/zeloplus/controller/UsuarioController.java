@@ -1,6 +1,7 @@
 package br.com.zelo.puls.zeloplus.controller;
 
 import br.com.zelo.puls.zeloplus.dto.CriarUsuarioDTO;
+import br.com.zelo.puls.zeloplus.dto.PerfilDTO;
 import br.com.zelo.puls.zeloplus.model.Usuario;
 import br.com.zelo.puls.zeloplus.service.UsuarioService;
 import org.springframework.http.ResponseEntity;
@@ -38,5 +39,10 @@ public class UsuarioController {
     @PostMapping("atualiza/{id}")
     public ResponseEntity<Usuario> atualizarUsuario(@RequestBody Usuario usuario) {
         return ResponseEntity.ok().body(usuarioService.atualizar(usuario));
+    }
+
+    @GetMapping("perfil/{id}")
+    public PerfilDTO buscarPorId(@PathVariable Integer id) {
+        return usuarioService.getPerfil(id);
     }
 }

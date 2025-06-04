@@ -14,6 +14,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.Base64;
 
@@ -144,4 +146,52 @@ public class UsuarioService {
 
         return "Foto de perfil salva com sucesso.";
     }
+
+    public PerfilDTO getPerfil(Integer usuarioId) {
+        Usuario usuario = repository.findById(usuarioId)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        String nome = null;
+        LocalDate dataNascimento = null;
+        Integer idUsuario = null;
+        String codigoVinculo = null;
+
+        Optional<Usuario> usuarioOpt = repository.findById(usuarioId);
+        if (usuarioOpt.isPresent() && usuarioOpt.get().getTipoUsuario() == TipoUsuario.IDOSO) {
+            Optional<Idoso> idosoOpt = idosoRepository.findByUsuario(usuarioOpt.get());
+            var idoso = idosoOpt.get();
+            nome = idoso.getNome();
+            dataNascimento = idoso.getDataNascimento();
+            idUsuario = idoso.getId();
+            codigoVinculo = idoso.getCodigoVinculo();
+        } else {
+            // Senão, assume que é cuidador
+            Cuidador cuidador = cuidadorRepository.findByUsuario(usuarioOpt.get())
+                    .orElseThrow(() -> new RuntimeException("Dados do cuidador não encontrados"));
+
+            nome = cuidador.getNome();
+            dataNascimento = cuidador.getDataNascimento();
+            idUsuario = cuidador.getId();
+            codigoVinculo = cuidador.getCodigoVinculo();
+        }
+
+        String fotoBase64 = "";
+        if (usuario.getFotoPerfil() != null) {
+            fotoBase64 = Base64.getEncoder().encodeToString(usuario.getFotoPerfil());
+        }
+
+        return new PerfilDTO(
+                usuario.getId(),
+                usuario.getNomeUsuario(),
+                fotoBase64,
+                usuario.getEmail(),
+                nome,
+                dataNascimento,
+                usuario.getTipoUsuario().toString(),
+                idUsuario,
+                codigoVinculo
+        );
+    }
+
+
 }
