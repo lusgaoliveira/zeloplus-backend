@@ -11,6 +11,7 @@ import br.com.zelo.puls.zeloplus.model.TipoTarefa;
 import br.com.zelo.puls.zeloplus.repository.TarefaRepository;
 import br.com.zelo.puls.zeloplus.repository.TipoTarefaRepository;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -54,6 +55,31 @@ public class TarefaService {
     public PegarTarefaDTO buscarPorId(Integer idTarefa) {
         return TarefaMapper.toReturnDTO(
                 tarefaRepository.findById(idTarefa).orElseThrow(() -> new IllegalArgumentException("Tarafa não encontrada")));
+    }
+
+
+    public void concluirTarefa(Integer id) {
+        Tarefa tarefa = tarefaRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Tarefa não encontrada"));
+        tarefa.setStatus(StatusTarefa.CONCLUIDA);
+        tarefaRepository.save(tarefa);
+    }
+
+    public void atualizarTarefa(Integer id, Tarefa tarefaAtualizada) {
+        Tarefa tarefaExistente = tarefaRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Tarefa não encontrada com id: " + id));
+
+        tarefaExistente.setTitulo(tarefaAtualizada.getTitulo());
+        tarefaExistente.setDescricao(tarefaAtualizada.getDescricao());
+        tarefaExistente.setDataAgendamento(tarefaAtualizada.getDataAgendamento());
+        tarefaExistente.setNivel(tarefaAtualizada.getNivel());
+
+        if (tarefaAtualizada.getTipo() != null && tarefaAtualizada.getTipo().getId() != null) {
+            TipoTarefa tipo = tipoTarefaRepository.findById(tarefaAtualizada.getTipo().getId())
+                    .orElseThrow(() -> new EntityNotFoundException("Tipo de tarefa não encontrado"));
+            tarefaExistente.setTipo(tipo);
+        }
+        tarefaRepository.save(tarefaExistente);
     }
 
 

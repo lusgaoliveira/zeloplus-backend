@@ -3,10 +3,12 @@ package br.com.zelo.puls.zeloplus.controller;
 import br.com.zelo.puls.zeloplus.dto.CriarTarefaDTO;
 import br.com.zelo.puls.zeloplus.dto.PegarListaTarefaDTO;
 import br.com.zelo.puls.zeloplus.dto.PegarTarefaDTO;
+import br.com.zelo.puls.zeloplus.model.Tarefa;
 import br.com.zelo.puls.zeloplus.service.TarefaService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +27,7 @@ public class TarefaController {
     @PostMapping("/criar")
     public ResponseEntity<?> criar(@RequestBody @Validated CriarTarefaDTO dto) {
         tarefaService.salvar(dto);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @GetMapping("/buscar/{id}")
@@ -41,4 +43,15 @@ public class TarefaController {
         return tarefaService.buscarTodasTarefas(id, pageable);
     }
 
+    @PatchMapping("/concluir/{id}")
+    public ResponseEntity<?> concluirTarefa(@PathVariable Integer id) {
+        tarefaService.concluirTarefa(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<?> atualizarTarefa(@PathVariable Integer id, @RequestBody Tarefa tarefaAtualizada) {
+        tarefaService.atualizarTarefa(id, tarefaAtualizada);
+        return ResponseEntity.ok().build();
+    }
 }

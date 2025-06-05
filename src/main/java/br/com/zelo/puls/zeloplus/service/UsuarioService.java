@@ -8,6 +8,7 @@ import br.com.zelo.puls.zeloplus.model.Usuario;
 import br.com.zelo.puls.zeloplus.repository.CuidadorRepository;
 import br.com.zelo.puls.zeloplus.repository.IdosoRepository;
 import br.com.zelo.puls.zeloplus.repository.UsuarioRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -124,28 +125,45 @@ public class UsuarioService {
         return repository.findById(id).orElse(null);
     }
 
-    public Usuario atualizar(Usuario usuario) {
-        return repository.save(usuario);
-    }
-
-    public String salvarFotoPerfil(Integer usuarioId, MultipartFile foto) {
-        Usuario usuario = usuarioRepository.findById(usuarioId)
+    @Transactional
+    public void atualizarPerfil(Integer usuarioId, PerfilUpdateDTO dto) {
+        Usuario usuario = repository.findById(usuarioId)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
-        if (foto.isEmpty()) {
-            throw new IllegalArgumentException("Arquivo inválido");
+        // Atualiza email e foto do usuário
+        if (dto.email() != null) {
+            usuario.setEmail(dto.email());
         }
-
-        try {
-            byte[] imagemBytes = foto.getBytes();
-            usuario.setFotoPerfil(imagemBytes);
-            usuarioRepository.save(usuario);
-        } catch (IOException e) {
-            throw new RuntimeException("Erro ao processar imagem", e);
+        if (dto.fotoPerfil() != null) {
+            byte[] fotoBytes = Base64.getDecoder().decode(dto.fotoPerfil());
+            usuario.setFotoPerfil(fotoBytes);
         }
+        repository.save(usuario);
 
-        return "Foto de perfil salva com sucesso.";
+        // Atualiza dados do idoso ou cuidador
+        if (usuario.getTipoUsuario() == TipoUsuario.IDOSO) {
+            Idoso idoso = idosoRepository.findByUsuario(usuario)
+                    .orElseThrow(() -> new RuntimeException("Idoso não encontrado"));
+            if (dto.nome() != null) {
+                idoso.setNome(dto.nome());
+            }
+            if (dto.dataNascimento() != null) {
+                idoso.setDataNascimento(dto.dataNascimento());
+            }
+            idosoRepository.save(idoso);
+        } else {
+            Cuidador cuidador = cuidadorRepository.findByUsuario(usuario)
+                    .orElseThrow(() -> new RuntimeException("Cuidador não encontrado"));
+            if (dto.nome() != null) {
+                cuidador.setNome(dto.nome());
+            }
+            if (dto.dataNascimento() != null) {
+                cuidador.setDataNascimento(dto.dataNascimento());
+            }
+            cuidadorRepository.save(cuidador);
+        }
     }
+
 
     public PerfilDTO getPerfil(Integer usuarioId) {
         Usuario usuario = repository.findById(usuarioId)
@@ -165,7 +183,7 @@ public class UsuarioService {
             idUsuario = idoso.getId();
             codigoVinculo = idoso.getCodigoVinculo();
         } else {
-            // Senão, assume que é cuidador
+            // assume que é cuidador
             Cuidador cuidador = cuidadorRepository.findByUsuario(usuarioOpt.get())
                     .orElseThrow(() -> new RuntimeException("Dados do cuidador não encontrados"));
 
