@@ -12,7 +12,8 @@ public class TarefaMapper {
         return new PegarListaTarefaDTO(
                 tarefa.getId(),
                 tarefa.getTitulo(),
-                tarefa.getStatus().name()
+                tarefa.getStatus().name(),
+                tarefa.getDataAgendamento()
         );
     }
 

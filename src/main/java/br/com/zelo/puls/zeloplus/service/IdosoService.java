@@ -27,6 +27,10 @@ public class IdosoService {
         return repository.findById(id);
     }
 
+    public Optional<Idoso> buscarPorUsuario(Usuario usuario) {
+        return repository.findByUsuario(usuario);
+    }
+
     public Idoso salvar(CriarIdosoDTO dto, Usuario usuario) {
         Idoso idoso = new Idoso(
                 null,

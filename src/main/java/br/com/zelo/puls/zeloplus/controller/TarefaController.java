@@ -7,6 +7,7 @@ import br.com.zelo.puls.zeloplus.model.Tarefa;
 import br.com.zelo.puls.zeloplus.service.TarefaService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,14 +39,21 @@ public class TarefaController {
     @GetMapping("/buscartarefas/{id}")
     public Page<PegarListaTarefaDTO> listarTarefasPorIdoso(
             @PathVariable Integer id,
-            @PageableDefault(size = 10, sort = "dataAgendamento") Pageable pageable
+            @PageableDefault(size = 10, sort = "dataAgendamento", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         return tarefaService.buscarTodasTarefas(id, pageable);
     }
 
+
     @PatchMapping("/concluir/{id}")
     public ResponseEntity<?> concluirTarefa(@PathVariable Integer id) {
         tarefaService.concluirTarefa(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/excluir/{id}")
+    public ResponseEntity<?> excluirTarefa(@PathVariable Integer id) {
+        tarefaService.excluirTarefa(id);
         return ResponseEntity.ok().build();
     }
 

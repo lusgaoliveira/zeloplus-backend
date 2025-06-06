@@ -13,6 +13,6 @@ public record CriarTarefaDTO(
         LocalDateTime dataAgendamento,
         @NotNull(message = "Id não pode ser nulo")
         Integer idTipoTarefa,
-        Integer idIdoso,
-        Integer nivel) {
+        Integer id,
+        int nivel) {
 }

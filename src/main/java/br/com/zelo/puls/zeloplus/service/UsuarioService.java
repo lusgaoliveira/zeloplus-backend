@@ -11,13 +11,10 @@ import br.com.zelo.puls.zeloplus.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
+import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.Base64;
 
 @Service
@@ -28,17 +25,20 @@ public class UsuarioService {
     private final CuidadorService cuidadorService;
     private final CuidadorRepository cuidadorRepository;
     private final IdosoRepository idosoRepository;
-
+    private EmailService emailService;
     @Value("${foto.perfil.diretorio:uploads/fotos}")
     private String diretorioFotos;
 
-    public UsuarioService(UsuarioRepository repository, UsuarioRepository usuarioRepository, IdosoService idosoService, CuidadorService cuidadorService, CuidadorRepository cuidadorRepository, IdosoRepository idosoRepository) {
+    public UsuarioService(UsuarioRepository repository, UsuarioRepository usuarioRepository, IdosoService idosoService,
+                          CuidadorService cuidadorService, CuidadorRepository cuidadorRepository, IdosoRepository idosoRepository,
+                          EmailService emailService) {
         this.repository = repository;
         this.usuarioRepository = usuarioRepository;
         this.idosoService = idosoService;
         this.cuidadorService = cuidadorService;
         this.cuidadorRepository = cuidadorRepository;
         this.idosoRepository = idosoRepository;
+        this.emailService = emailService;
     }
 
 
@@ -211,5 +211,54 @@ public class UsuarioService {
         );
     }
 
+    public void atualizarSenha(Integer idUsuario, String senha) {
+        Usuario usuario = repository.findById(idUsuario)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+        usuario.setSenha(senha);
+        repository.save(usuario);
+    }
 
+
+    public void recuperarSenha(String email) {
+        Usuario usuario = repository.findByEmail(email);
+
+        if (usuario != null) {
+            var senha = gerarSenhaAleatoria();
+            usuario.setSenha(senha);
+            repository.save(usuario);
+
+            String assunto = "Nova senha solicitada na recuperação de senha";
+            String mensagem = "Olá, você solicitou uma nova senha no nosso aplicativo Zelo+. " +
+                    "Uma senha aleatória foi gerada e está disponível abaixo. " +
+                    "Lembre-se de alterá-la no aplicativo:\n\n" + senha;
+
+            emailService.enviarEmail(email, assunto, mensagem);
+            return;
+        }
+
+        throw new IllegalArgumentException("Email não encontrado!");
+    }
+
+
+    private String gerarSenhaAleatoria() {
+        SecureRandom random = new SecureRandom();
+        int numero = random.nextInt(100_000_000);
+        return String.format("%08d", numero);
+    }
+
+    public void gerarVinculo(Integer id) {
+        var usuario = usuarioRepository.findById(id).orElseThrow(
+                () -> new IllegalArgumentException("Usuário não encontrado!")
+        );
+
+        if (usuario.getTipoUsuario() != TipoUsuario.IDOSO) {
+            throw new IllegalArgumentException("Usuário não é do tipo idoso");
+        }
+        var idoso = idosoRepository.findByUsuario(usuario).orElseThrow(
+                () -> new IllegalArgumentException("Idoso não encontrado!")
+        );
+
+        idoso.setCodigoVinculo(idosoService.gerarCodigoVinculo(idoso.getId()));
+        idosoRepository.save(idoso);
+    }
 }
