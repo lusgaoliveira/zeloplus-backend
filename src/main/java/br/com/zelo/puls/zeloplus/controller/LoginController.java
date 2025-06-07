@@ -21,7 +21,7 @@ public class LoginController {
     }
 
     @PostMapping("login")
-    public LoginRespostaDTO criar(@RequestBody @Validated LoginDTO dto) {
+    public LoginRespostaDTO login(@RequestBody @Validated LoginDTO dto) {
         return usuarioService.login(dto);
     }
 

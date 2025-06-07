@@ -21,6 +21,7 @@ public class UsuarioController {
 
     @PostMapping("/criar")
     public ResponseEntity<Usuario> criarUsuario(@RequestBody CriarUsuarioDTO usuario) {
+        System.out.println("criar: " + usuario);
         return ResponseEntity.ok(usuarioService.salvar(usuario));
     }
 
