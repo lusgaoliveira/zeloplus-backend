@@ -13,6 +13,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 
 @Service
 public class TarefaService {
@@ -110,5 +115,29 @@ public class TarefaService {
         tarefaRepository.save(tarefaExistente);
     }
 
+
+    public Map<String, Long> getTarefasPorStatus(Integer idosoId, Integer mes) {
+        return tarefaRepository.contarTarefasPorStatus(idosoId, mes).stream()
+                .collect(Collectors.toMap(
+                        obj -> ((StatusTarefa) obj[0]).name(),
+                        obj -> (Long) obj[1]
+                ));
+    }
+
+    public Map<String, Long> getTarefasPorNivel(Integer idosoId, Integer mes) {
+        return tarefaRepository.contarTarefasPorNivel(idosoId, mes).stream()
+                .collect(Collectors.toMap(
+                        obj -> String.valueOf(obj[0]),
+                        obj -> (Long) obj[1]
+                ));
+    }
+
+    public Map<String, Long> getTarefasPorTipo(Integer idosoId, Integer mes) {
+        return tarefaRepository.contarTarefasPorTipo(idosoId, mes).stream()
+                .collect(Collectors.toMap(
+                        obj -> (String) obj[0],
+                        obj -> (Long) obj[1]
+                ));
+    }
 
 }

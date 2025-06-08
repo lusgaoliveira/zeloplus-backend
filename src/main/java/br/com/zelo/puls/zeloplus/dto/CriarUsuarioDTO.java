@@ -6,7 +6,6 @@ public record CriarUsuarioDTO(
         String nomeUsuario,
         String senha,
         String email,
-        String fotoPerfil,
         String nome,
         String tipoUsuario,
         LocalDate dataNascimento,

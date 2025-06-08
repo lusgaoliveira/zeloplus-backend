@@ -88,11 +88,6 @@ public class UsuarioService {
     }
 
     public Usuario salvar(CriarUsuarioDTO dto) {
-        byte[] fotoPerfilBytes = null;
-
-        if (dto.fotoPerfil() != null && !dto.fotoPerfil().isEmpty()) {
-            fotoPerfilBytes = Base64.getDecoder().decode(dto.fotoPerfil());
-        }
 
         var usuario = new Usuario(
                 null,
@@ -100,7 +95,7 @@ public class UsuarioService {
                 dto.senha(),
                 TipoUsuario.valueOf(dto.tipoUsuario()),
                 dto.email(),
-                fotoPerfilBytes
+                null
         );
 
         repository.save(usuario);

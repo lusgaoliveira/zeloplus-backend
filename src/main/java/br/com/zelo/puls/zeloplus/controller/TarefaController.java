@@ -14,6 +14,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 
 @RestController
 @Validated
@@ -62,4 +67,31 @@ public class TarefaController {
         tarefaService.atualizarTarefa(id, tarefaAtualizada);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/{criterio}")
+    public ResponseEntity<?> obterRelatorioPorCriterio(
+            @PathVariable String criterio,
+            @RequestParam Integer id,
+            @RequestParam(required = false) Integer mes
+    ) {
+        Map<String, Long> resultado;
+
+        switch (criterio.toLowerCase()) {
+            case "status":
+                resultado = tarefaService.getTarefasPorStatus(id, mes);
+                break;
+            case "nivel":
+                resultado = tarefaService.getTarefasPorNivel(id, mes);
+                break;
+            case "tipo":
+                resultado = tarefaService.getTarefasPorTipo(id, mes);
+                break;
+            default:
+                return ResponseEntity.badRequest().body("Critério inválido");
+        }
+
+        return ResponseEntity.ok(resultado);
+    }
+
+
 }
