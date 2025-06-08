@@ -36,4 +36,6 @@ public class Usuario {
     @Column(name = "foto_perfil")
     private byte[] fotoPerfil;;
 
+    @Column(name = "token_expo", nullable = false)
+    private String tokenExpo;
 }

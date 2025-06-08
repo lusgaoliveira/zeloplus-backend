@@ -95,7 +95,8 @@ public class UsuarioService {
                 dto.senha(),
                 TipoUsuario.valueOf(dto.tipoUsuario()),
                 dto.email(),
-                null
+                null,
+                dto.tokenExpo()
         );
 
         repository.save(usuario);

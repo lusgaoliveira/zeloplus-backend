@@ -9,6 +9,7 @@ public record CriarUsuarioDTO(
         String nome,
         String tipoUsuario,
         LocalDate dataNascimento,
-        String codigoVinculo
+        String codigoVinculo,
+        String tokenExpo
 ) {
 }
